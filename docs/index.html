@@ -131,6 +131,19 @@
   .clear-btn:hover, .undecl-toggle:hover { background: var(--gray-100); }
   .undecl-toggle.active { background: var(--blue); color: white; border-color: var(--blue); }
 
+  .major-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .major-header-row h3 { margin: 0; }
+  .sort-toggle {
+    font-size: 0.74rem;
+    color: var(--gray-600);
+    background: var(--gray-50);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .sort-toggle:hover { background: var(--gray-100); }
+
   table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   thead th {
     text-align: left;
@@ -204,7 +217,7 @@
 <div class="container">
 
   <div class="search-row">
-    <input id="searchInput" type="text" placeholder="Search by first or last name…" autocomplete="off">
+    <input id="searchInput" type="text" placeholder="Search by name, or initials like &quot;AK&quot;…" autocomplete="off">
   </div>
 
   <div id="suggestionsBox"></div>
@@ -224,7 +237,10 @@
         <div class="chip-list" id="divisionChips"></div>
       </div>
       <div class="filter-group" style="grid-column: 1 / -1;">
-        <h3>Major</h3>
+        <div class="major-header-row">
+          <h3>Major</h3>
+          <button class="sort-toggle" id="majorSortToggle" title="Toggle major list sort order">Sort: A–Z</button>
+        </div>
         <input id="majorSearch" class="major-search" type="text" placeholder="Filter major list…">
         <div class="chip-list" id="majorChips"></div>
       </div>
@@ -260,23 +276,17 @@ const state = {
   hideUndeclared: false,
   page: 1,
   majorFilterText: "",
+  majorSortMode: "alpha", // "alpha" | "popularity"
 };
 
-// ---------- derive facets ----------
-const collegeCounts = {};
-const gradeCounts = {};
-const divisionCounts = {};
-const majorCounts = {};
-
+// ---------- derive static facet value lists (all possible values, unfiltered) ----------
+const collegeSet = new Set(), majorSet = new Set();
 for (const s of STUDENTS) {
-  collegeCounts[s.college] = (collegeCounts[s.college] || 0) + 1;
-  gradeCounts[s.grade] = (gradeCounts[s.grade] || 0) + 1;
-  for (const d of s.divisions) divisionCounts[d] = (divisionCounts[d] || 0) + 1;
-  for (const m of s.majors) majorCounts[m] = (majorCounts[m] || 0) + 1;
+  collegeSet.add(s.college);
+  for (const m of s.majors) majorSet.add(m);
 }
-
-const colleges = Object.keys(collegeCounts).sort();
-const majors = Object.keys(majorCounts).sort();
+const colleges = [...collegeSet].sort();
+const majors = [...majorSet].sort();
 
 // ---------- name search helpers ----------
 function normalize(s) {
@@ -302,13 +312,19 @@ function levenshtein(a, b) {
 const searchIndex = STUDENTS.map(s => {
   const norm = normalize(s.name);
   const tokens = norm.split(/\s+/);
-  return { s, norm, tokens };
+  const initials = tokens.map(t => t[0] || "").join("");
+  return { s, norm, tokens, initials };
 });
 
 function nameMatches(entry, q) {
   if (!q) return true;
   if (entry.norm.includes(q)) return true;
-  return entry.tokens.some(t => t.startsWith(q));
+  if (entry.tokens.some(t => t.startsWith(q))) return true;
+  // Initials search, e.g. "AK" -> Aiden Khan. Require 2+ letters so it
+  // doesn't just duplicate the single-letter token-prefix check above.
+  const qNoSpace = q.replace(/\s+/g, "");
+  if (qNoSpace.length >= 2 && entry.initials.startsWith(qNoSpace)) return true;
+  return false;
 }
 
 function findSuggestions(q) {
@@ -337,9 +353,41 @@ function findSuggestions(q) {
 }
 
 // ---------- filtering ----------
-function getFiltered() {
+function getQueryMatchedStudents() {
   const q = normalize(state.query.trim());
-  let list = searchIndex.filter(e => nameMatches(e, q)).map(e => e.s);
+  return searchIndex.filter(e => nameMatches(e, q)).map(e => e.s);
+}
+
+// A student "passes" for facet-count purposes if it matches the name query
+// and every active filter category EXCEPT `exclude` (so a category's own
+// chips show counts as if that category weren't filtering yet, letting you
+// see what adding/switching an option would do). hideUndeclared always
+// applies since it isn't one of the four chip categories.
+function passesExcept(s, exclude, queryMatchedSet) {
+  if (!queryMatchedSet.has(s)) return false;
+  if (exclude !== "colleges" && state.colleges.size && !state.colleges.has(s.college)) return false;
+  if (exclude !== "grades" && state.grades.size && !state.grades.has(s.grade)) return false;
+  if (exclude !== "divisions" && state.divisions.size && !s.divisions.some(d => state.divisions.has(d))) return false;
+  if (exclude !== "majors" && state.majors.size && !s.majors.some(m => state.majors.has(m))) return false;
+  if (state.hideUndeclared && s.noMajorDeclared) return false;
+  return true;
+}
+
+function computeFacetCounts(exclude, valueExtractor, queryMatchedSet) {
+  const counts = {};
+  for (const s of STUDENTS) {
+    if (!passesExcept(s, exclude, queryMatchedSet)) continue;
+    const vals = valueExtractor(s);
+    for (const v of (Array.isArray(vals) ? vals : [vals])) {
+      if (!v) continue;
+      counts[v] = (counts[v] || 0) + 1;
+    }
+  }
+  return counts;
+}
+
+function getFiltered() {
+  let list = getQueryMatchedStudents();
 
   if (state.colleges.size) list = list.filter(s => state.colleges.has(s.college));
   if (state.grades.size) list = list.filter(s => state.grades.has(s.grade));
@@ -351,9 +399,13 @@ function getFiltered() {
 }
 
 // ---------- rendering ----------
-function renderChips(container, items, counts, activeSet, opts) {
+function renderChips(container, items, counts, activeSet) {
   container.innerHTML = "";
-  for (const item of items) {
+  // Options with nobody left under the current combination of filters are
+  // hidden so the list stays easy to scan -- e.g. picking a college that
+  // has no Cello Performance majors drops that chip from the Major list.
+  const visible = items.filter(item => (counts[item] || 0) > 0);
+  for (const item of visible) {
     const chip = document.createElement("div");
     chip.className = "chip" + (activeSet.has(item) ? " active" : "");
     chip.innerHTML = `${escapeHtml(item)} <span class="count">${counts[item] || 0}</span>`;
@@ -442,13 +494,25 @@ function renderResults(filtered) {
 
 function render() {
   const filtered = getFiltered();
-  renderChips(document.getElementById("collegeChips"), colleges, collegeCounts, state.colleges);
-  renderChips(document.getElementById("gradeChips"), GRADE_ORDER, gradeCounts, state.grades);
-  renderChips(document.getElementById("divisionChips"), DIVISION_ORDER, divisionCounts, state.divisions);
+  const queryMatchedSet = new Set(getQueryMatchedStudents());
+
+  const collegeCountsDyn = computeFacetCounts("colleges", s => s.college, queryMatchedSet);
+  const gradeCountsDyn = computeFacetCounts("grades", s => s.grade, queryMatchedSet);
+  const divisionCountsDyn = computeFacetCounts("divisions", s => s.divisions, queryMatchedSet);
+  const majorCountsDyn = computeFacetCounts("majors", s => s.majors, queryMatchedSet);
+
+  renderChips(document.getElementById("collegeChips"), colleges, collegeCountsDyn, state.colleges);
+  renderChips(document.getElementById("gradeChips"), GRADE_ORDER, gradeCountsDyn, state.grades);
+  renderChips(document.getElementById("divisionChips"), DIVISION_ORDER, divisionCountsDyn, state.divisions);
 
   const majorFilter = normalize(state.majorFilterText.trim());
-  const visibleMajors = majorFilter ? majors.filter(m => normalize(m).includes(majorFilter)) : majors;
-  renderChips(document.getElementById("majorChips"), visibleMajors, majorCounts, state.majors);
+  let visibleMajors = majorFilter ? majors.filter(m => normalize(m).includes(majorFilter)) : majors;
+  if (state.majorSortMode === "popularity") {
+    visibleMajors = [...visibleMajors].sort((a, b) =>
+      (majorCountsDyn[b] || 0) - (majorCountsDyn[a] || 0) || a.localeCompare(b)
+    );
+  }
+  renderChips(document.getElementById("majorChips"), visibleMajors, majorCountsDyn, state.majors);
 
   renderSuggestions(filtered);
   renderResults(filtered);
@@ -485,6 +549,12 @@ document.getElementById("undeclToggle").addEventListener("click", (e) => {
   state.hideUndeclared = !state.hideUndeclared;
   e.target.classList.toggle("active", state.hideUndeclared);
   state.page = 1;
+  render();
+});
+
+document.getElementById("majorSortToggle").addEventListener("click", (e) => {
+  state.majorSortMode = state.majorSortMode === "alpha" ? "popularity" : "alpha";
+  e.target.textContent = state.majorSortMode === "alpha" ? "Sort: A–Z" : "Sort: Popularity";
   render();
 });
 
