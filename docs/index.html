@@ -217,7 +217,8 @@
 <div class="container">
 
   <div class="search-row">
-    <input id="searchInput" type="text" placeholder="Search by name, or initials like &quot;AK&quot;…" autocomplete="off">
+    <input id="searchInput" type="text" placeholder="Search by name…" autocomplete="off">
+    <button class="undecl-toggle" id="initialsToggle" title="Match by initials instead of name text (e.g. &quot;AT&quot; only matches people whose first+last initials are A and T)">Search by initials</button>
   </div>
 
   <div id="suggestionsBox"></div>
@@ -277,6 +278,7 @@ const state = {
   page: 1,
   majorFilterText: "",
   majorSortMode: "alpha", // "alpha" | "popularity"
+  initialsMode: false,
 };
 
 // ---------- derive static facet value lists (all possible values, unfiltered) ----------
@@ -316,15 +318,25 @@ const searchIndex = STUDENTS.map(s => {
   return { s, norm, tokens, initials };
 });
 
-function nameMatches(entry, q) {
+// Two independent match modes, kept separate on purpose: blending initials
+// into the regular text search meant "AT" matched every name containing
+// the substring "at" (Natalie, Matthew...) as well as actual A.T. initials,
+// which buried the initials matches. The dedicated toggle below makes
+// initials search exact instead.
+function nameMatchesText(entry, q) {
   if (!q) return true;
   if (entry.norm.includes(q)) return true;
-  if (entry.tokens.some(t => t.startsWith(q))) return true;
-  // Initials search, e.g. "AK" -> Aiden Khan. Require 2+ letters so it
-  // doesn't just duplicate the single-letter token-prefix check above.
+  return entry.tokens.some(t => t.startsWith(q));
+}
+
+function nameMatchesInitials(entry, q) {
   const qNoSpace = q.replace(/\s+/g, "");
-  if (qNoSpace.length >= 2 && entry.initials.startsWith(qNoSpace)) return true;
-  return false;
+  if (!qNoSpace) return true;
+  return entry.initials.startsWith(qNoSpace);
+}
+
+function nameMatches(entry, q) {
+  return state.initialsMode ? nameMatchesInitials(entry, q) : nameMatchesText(entry, q);
 }
 
 function findSuggestions(q) {
@@ -427,6 +439,10 @@ function renderSuggestions(filtered) {
   const box = document.getElementById("suggestionsBox");
   const q = state.query.trim();
   if (filtered.length > 0 || q.length < 2) { box.innerHTML = ""; return; }
+  if (state.initialsMode) {
+    box.innerHTML = `<div class="suggestions"><strong>No one has the initials "${escapeHtml(q.toUpperCase())}".</strong></div>`;
+    return;
+  }
   const suggestions = findSuggestions(normalize(q));
   if (!suggestions.length) {
     box.innerHTML = `<div class="suggestions"><strong>No matches for "${escapeHtml(q)}".</strong> Try a different spelling.</div>`;
@@ -530,6 +546,16 @@ document.getElementById("majorSearch").addEventListener("input", (e) => {
   render();
 });
 
+document.getElementById("initialsToggle").addEventListener("click", (e) => {
+  state.initialsMode = !state.initialsMode;
+  e.target.classList.toggle("active", state.initialsMode);
+  document.getElementById("searchInput").placeholder = state.initialsMode
+    ? 'Search by initials, e.g. "AT"…'
+    : "Search by name…";
+  state.page = 1;
+  render();
+});
+
 document.getElementById("clearBtn").addEventListener("click", () => {
   state.query = "";
   state.colleges.clear();
@@ -537,11 +563,14 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   state.divisions.clear();
   state.majors.clear();
   state.hideUndeclared = false;
+  state.initialsMode = false;
   state.page = 1;
   document.getElementById("searchInput").value = "";
+  document.getElementById("searchInput").placeholder = "Search by name…";
   document.getElementById("majorSearch").value = "";
   state.majorFilterText = "";
   document.getElementById("undeclToggle").classList.remove("active");
+  document.getElementById("initialsToggle").classList.remove("active");
   render();
 });
 
