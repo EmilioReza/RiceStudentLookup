@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rice Student Lookup</title>
+<style>
+  :root {
+    --blue: #00205B;
+    --blue-light: #0f3a8c;
+    --gray-50: #f7f8fa;
+    --gray-100: #eef0f4;
+    --gray-200: #e2e5eb;
+    --gray-400: #9aa1ad;
+    --gray-600: #5b6270;
+    --gray-800: #262b33;
+    --border: #dde1e8;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+  }
+  header {
+    background: var(--blue);
+    color: white;
+    padding: 22px 24px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 1.4rem; font-weight: 700; }
+  header p { margin: 0; color: #c8d2e8; font-size: 0.88rem; }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 20px 24px 60px; }
+
+  .search-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  #searchInput {
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    background: white;
+  }
+  #searchInput:focus { border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(15,58,140,0.12); }
+
+  .panel {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .filter-group h3 {
+    margin: 0 0 8px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gray-600);
+    font-weight: 700;
+  }
+  .chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 160px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--gray-50);
+    font-size: 0.8rem;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .chip:hover { border-color: var(--blue-light); }
+  .chip.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white;
+  }
+  .chip .count { color: var(--gray-400); font-size: 0.75rem; }
+  .chip.active .count { color: #c8d2e8; }
+
+  .major-search {
+    width: 100%;
+    padding: 7px 9px;
+    font-size: 0.82rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    outline: none;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .result-count { font-size: 0.88rem; color: var(--gray-600); }
+  .clear-btn, .undecl-toggle {
+    font-size: 0.8rem;
+    color: var(--blue-light);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .clear-btn:hover, .undecl-toggle:hover { background: var(--gray-100); }
+  .undecl-toggle.active { background: var(--blue); color: white; border-color: var(--blue); }
+
+  table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  thead th {
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray-600);
+    background: var(--gray-100);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid var(--gray-100); font-size: 0.92rem; vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--gray-50); }
+  .name-cell { font-weight: 600; }
+  .major-tag {
+    display: inline-block;
+    background: var(--gray-100);
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 0.8rem;
+    margin: 1px 3px 1px 0;
+  }
+  .div-tag { color: var(--gray-600); font-size: 0.78rem; }
+  .no-major { color: var(--gray-400); font-style: italic; font-size: 0.85rem; }
+
+  .suggestions {
+    background: #fff8e6;
+    border: 1px solid #f0dca0;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+  }
+  .suggestions strong { display: block; margin-bottom: 6px; }
+  .suggestion-link {
+    display: inline-block;
+    margin: 2px 8px 2px 0;
+    padding: 4px 10px;
+    background: white;
+    border: 1px solid #f0dca0;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .suggestion-link:hover { background: #fdf0c8; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-600); }
+
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 16px; }
+  .pagination button {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .pagination button:disabled { opacity: 0.4; cursor: default; }
+
+  footer { text-align: center; color: var(--gray-400); font-size: 0.78rem; padding: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Rice Student Lookup</h1>
+  <p>Public directory data — search by name, or browse by college, major, division, and grade.</p>
+</header>
+
+<div class="container">
+
+  <div class="search-row">
+    <input id="searchInput" type="text" placeholder="Search by first or last name…" autocomplete="off">
+  </div>
+
+  <div id="suggestionsBox"></div>
+
+  <div class="panel">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <h3>College</h3>
+        <div class="chip-list" id="collegeChips"></div>
+      </div>
+      <div class="filter-group">
+        <h3>Grade</h3>
+        <div class="chip-list" id="gradeChips"></div>
+      </div>
+      <div class="filter-group">
+        <h3>Division</h3>
+        <div class="chip-list" id="divisionChips"></div>
+      </div>
+      <div class="filter-group" style="grid-column: 1 / -1;">
+        <h3>Major</h3>
+        <input id="majorSearch" class="major-search" type="text" placeholder="Filter major list…">
+        <div class="chip-list" id="majorChips"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="result-count" id="resultCount"></div>
+    <div style="display:flex; gap:8px;">
+      <button class="undecl-toggle" id="undeclToggle" title="Include/exclude students who haven't declared a specific major yet">Hide undeclared</button>
+      <button class="clear-btn" id="clearBtn">Clear all filters</button>
+    </div>
+  </div>
+
+  <div id="resultsWrap"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<footer>Data sourced from Rice's public student directory. Matriculation year and email are intentionally not shown.</footer>
+
+<script src="data.js"></script>
+<script>
+const PAGE_SIZE = 50;
+const GRADE_ORDER = ["Freshman", "Sophomore", "Junior", "Senior"];
+const DIVISION_ORDER = ["Architecture", "Business", "Engineering", "Humanities", "Music", "Natural Sciences", "Social Sciences"];
+
+const state = {
+  query: "",
+  colleges: new Set(),
+  grades: new Set(),
+  divisions: new Set(),
+  majors: new Set(),
+  hideUndeclared: false,
+  page: 1,
+  majorFilterText: "",
+};
+
+// ---------- derive facets ----------
+const collegeCounts = {};
+const gradeCounts = {};
+const divisionCounts = {};
+const majorCounts = {};
+
+for (const s of STUDENTS) {
+  collegeCounts[s.college] = (collegeCounts[s.college] || 0) + 1;
+  gradeCounts[s.grade] = (gradeCounts[s.grade] || 0) + 1;
+  for (const d of s.divisions) divisionCounts[d] = (divisionCounts[d] || 0) + 1;
+  for (const m of s.majors) majorCounts[m] = (majorCounts[m] || 0) + 1;
+}
+
+const colleges = Object.keys(collegeCounts).sort();
+const majors = Object.keys(majorCounts).sort();
+
+// ---------- name search helpers ----------
+function normalize(s) {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  let prev = Array(n + 1).fill(0).map((_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+
+const searchIndex = STUDENTS.map(s => {
+  const norm = normalize(s.name);
+  const tokens = norm.split(/\s+/);
+  return { s, norm, tokens };
+});
+
+function nameMatches(entry, q) {
+  if (!q) return true;
+  if (entry.norm.includes(q)) return true;
+  return entry.tokens.some(t => t.startsWith(q));
+}
+
+function findSuggestions(q) {
+  if (!q || q.length < 2) return [];
+  const scored = [];
+  for (const entry of searchIndex) {
+    let best = Infinity;
+    for (const t of entry.tokens) {
+      const d = levenshtein(q, t.slice(0, Math.max(q.length + 2, 4)));
+      if (d < best) best = d;
+    }
+    const dFull = levenshtein(q, entry.norm);
+    best = Math.min(best, dFull);
+    if (best <= 2) scored.push({ entry, best });
+  }
+  scored.sort((a, b) => a.best - b.best);
+  const seen = new Set();
+  const out = [];
+  for (const { entry } of scored) {
+    if (seen.has(entry.s.name)) continue;
+    seen.add(entry.s.name);
+    out.push(entry.s.name);
+    if (out.length >= 8) break;
+  }
+  return out;
+}
+
+// ---------- filtering ----------
+function getFiltered() {
+  const q = normalize(state.query.trim());
+  let list = searchIndex.filter(e => nameMatches(e, q)).map(e => e.s);
+
+  if (state.colleges.size) list = list.filter(s => state.colleges.has(s.college));
+  if (state.grades.size) list = list.filter(s => state.grades.has(s.grade));
+  if (state.divisions.size) list = list.filter(s => s.divisions.some(d => state.divisions.has(d)));
+  if (state.majors.size) list = list.filter(s => s.majors.some(m => state.majors.has(m)));
+  if (state.hideUndeclared) list = list.filter(s => !s.noMajorDeclared);
+
+  return list;
+}
+
+// ---------- rendering ----------
+function renderChips(container, items, counts, activeSet, opts) {
+  container.innerHTML = "";
+  for (const item of items) {
+    const chip = document.createElement("div");
+    chip.className = "chip" + (activeSet.has(item) ? " active" : "");
+    chip.innerHTML = `${escapeHtml(item)} <span class="count">${counts[item] || 0}</span>`;
+    chip.addEventListener("click", () => {
+      if (activeSet.has(item)) activeSet.delete(item);
+      else activeSet.add(item);
+      state.page = 1;
+      render();
+    });
+    container.appendChild(chip);
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function renderSuggestions(filtered) {
+  const box = document.getElementById("suggestionsBox");
+  const q = state.query.trim();
+  if (filtered.length > 0 || q.length < 2) { box.innerHTML = ""; return; }
+  const suggestions = findSuggestions(normalize(q));
+  if (!suggestions.length) {
+    box.innerHTML = `<div class="suggestions"><strong>No matches for "${escapeHtml(q)}".</strong> Try a different spelling.</div>`;
+    return;
+  }
+  box.innerHTML = `<div class="suggestions"><strong>No exact matches for "${escapeHtml(q)}". Did you mean:</strong>` +
+    suggestions.map(n => `<span class="suggestion-link" data-name="${escapeHtml(n)}">${escapeHtml(n)}</span>`).join("") +
+    `</div>`;
+  box.querySelectorAll(".suggestion-link").forEach(el => {
+    el.addEventListener("click", () => {
+      document.getElementById("searchInput").value = el.dataset.name;
+      state.query = el.dataset.name;
+      state.page = 1;
+      render();
+    });
+  });
+}
+
+function renderResults(filtered) {
+  const wrap = document.getElementById("resultsWrap");
+  const countEl = document.getElementById("resultCount");
+  countEl.textContent = `${filtered.length.toLocaleString()} ${filtered.length === 1 ? "person" : "people"}`;
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = `<div class="empty-state">No one matches these filters.</div>`;
+    document.getElementById("pagination").innerHTML = "";
+    return;
+  }
+
+  const sorted = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  state.page = Math.min(state.page, totalPages);
+  const start = (state.page - 1) * PAGE_SIZE;
+  const pageItems = sorted.slice(start, start + PAGE_SIZE);
+
+  let html = `<table><thead><tr><th>Name</th><th>College</th><th>Grade</th><th>Major(s)</th></tr></thead><tbody>`;
+  for (const s of pageItems) {
+    let majorCell;
+    if (s.majors.length) {
+      majorCell = s.majors.map(m => `<span class="major-tag">${escapeHtml(m)}</span>`).join("");
+      if (s.divisions.length) majorCell += `<div class="div-tag">${s.divisions.join(", ")}</div>`;
+    } else if (s.noMajorDeclared) {
+      majorCell = `<span class="no-major">Undeclared${s.divisions.length ? " — " + s.divisions.join(", ") : ""}</span>`;
+    } else {
+      majorCell = `<span class="no-major">—</span>`;
+    }
+    html += `<tr><td class="name-cell">${escapeHtml(s.name)}</td><td>${escapeHtml(s.college)}</td><td>${escapeHtml(s.grade)}</td><td>${majorCell}</td></tr>`;
+  }
+  html += `</tbody></table>`;
+  wrap.innerHTML = html;
+
+  const pag = document.getElementById("pagination");
+  if (totalPages > 1) {
+    pag.innerHTML = `
+      <button id="prevPage" ${state.page === 1 ? "disabled" : ""}>&larr; Prev</button>
+      <span>Page ${state.page} of ${totalPages}</span>
+      <button id="nextPage" ${state.page === totalPages ? "disabled" : ""}>Next &rarr;</button>
+    `;
+    document.getElementById("prevPage")?.addEventListener("click", () => { state.page--; render(); window.scrollTo({top:0,behavior:"smooth"}); });
+    document.getElementById("nextPage")?.addEventListener("click", () => { state.page++; render(); window.scrollTo({top:0,behavior:"smooth"}); });
+  } else {
+    pag.innerHTML = "";
+  }
+}
+
+function render() {
+  const filtered = getFiltered();
+  renderChips(document.getElementById("collegeChips"), colleges, collegeCounts, state.colleges);
+  renderChips(document.getElementById("gradeChips"), GRADE_ORDER, gradeCounts, state.grades);
+  renderChips(document.getElementById("divisionChips"), DIVISION_ORDER, divisionCounts, state.divisions);
+
+  const majorFilter = normalize(state.majorFilterText.trim());
+  const visibleMajors = majorFilter ? majors.filter(m => normalize(m).includes(majorFilter)) : majors;
+  renderChips(document.getElementById("majorChips"), visibleMajors, majorCounts, state.majors);
+
+  renderSuggestions(filtered);
+  renderResults(filtered);
+}
+
+// ---------- wire up controls ----------
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  state.query = e.target.value;
+  state.page = 1;
+  render();
+});
+
+document.getElementById("majorSearch").addEventListener("input", (e) => {
+  state.majorFilterText = e.target.value;
+  render();
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  state.query = "";
+  state.colleges.clear();
+  state.grades.clear();
+  state.divisions.clear();
+  state.majors.clear();
+  state.hideUndeclared = false;
+  state.page = 1;
+  document.getElementById("searchInput").value = "";
+  document.getElementById("majorSearch").value = "";
+  state.majorFilterText = "";
+  document.getElementById("undeclToggle").classList.remove("active");
+  render();
+});
+
+document.getElementById("undeclToggle").addEventListener("click", (e) => {
+  state.hideUndeclared = !state.hideUndeclared;
+  e.target.classList.toggle("active", state.hideUndeclared);
+  state.page = 1;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

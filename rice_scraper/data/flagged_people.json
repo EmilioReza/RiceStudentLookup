@@ -1,0 +1,532 @@
+[
+  {
+    "name": "Eliza Ekyem-Mensah",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Baker College",
+    "major": "Mechanical Engineering",
+    "college_page": "https://search.rice.edu/people/college/baker-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Emir Sendogan",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Baker College",
+    "major": "Mechanical Engineering Business",
+    "college_page": "https://search.rice.edu/people/college/baker-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Ephraim Dotson",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Baker College",
+    "major": "Social Sciences Division",
+    "college_page": "https://search.rice.edu/people/college/baker-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Jean Paul Gaviria",
+    "affiliation": "Sophomore",
+    "matriculation_term": "Fall 2021",
+    "college": "Baker College",
+    "major": "Electrical & Computer Eng.",
+    "college_page": "https://search.rice.edu/people/college/baker-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Joshua Lee",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Baker College",
+    "major": "Computer Science",
+    "college_page": "https://search.rice.edu/people/college/baker-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Justin So",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2020",
+    "college": "Baker College",
+    "major": "Electrical & Computer Eng.",
+    "college_page": "https://search.rice.edu/people/college/baker-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Sarah Eleraky",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Baker College",
+    "major": "Stdy of Womn Gendr & Sexuality",
+    "college_page": "https://search.rice.edu/people/college/baker-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Arrya Abmayr",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2020",
+    "college": "Brown College",
+    "major": "Philosophy",
+    "college_page": "https://search.rice.edu/people/college/brown-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Eric Li",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Brown College",
+    "major": "Humanities Division",
+    "college_page": "https://search.rice.edu/people/college/brown-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Kaelin Wang Hu",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2026",
+    "college": "Brown College",
+    "major": "Engineering Division",
+    "college_page": "https://search.rice.edu/people/college/brown-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Nathan Cho",
+    "affiliation": "Sophomore",
+    "matriculation_term": "Fall 2023",
+    "college": "Brown College",
+    "major": "Architecture Division",
+    "college_page": "https://search.rice.edu/people/college/brown-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Rebekah Mitchell",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Brown College",
+    "major": "Health Sciences Anthropology",
+    "college_page": "https://search.rice.edu/people/college/brown-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Mariel Cantalapiedra",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2026",
+    "college": "Chao College",
+    "major": "Engineering Division",
+    "college_page": "https://search.rice.edu/people/college/chao-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Anmol Dubey",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Duncan College",
+    "major": "Materials Science & NanoEng",
+    "college_page": "https://search.rice.edu/people/college/duncan-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Brian Jeong",
+    "affiliation": "Sophomore",
+    "matriculation_term": "Fall 2023",
+    "college": "Duncan College",
+    "major": "Biosciences",
+    "college_page": "https://search.rice.edu/people/college/duncan-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Clara Sanchez-Lapitan",
+    "affiliation": "Sophomore",
+    "matriculation_term": "Fall 2023",
+    "college": "Duncan College",
+    "major": "Business",
+    "college_page": "https://search.rice.edu/people/college/duncan-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Trey Weltens",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2020",
+    "college": "Duncan College",
+    "major": "History",
+    "college_page": "https://search.rice.edu/people/college/duncan-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Adam Sher",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Hanszen College",
+    "major": "Electrical & Computer Eng.",
+    "college_page": "https://search.rice.edu/people/college/hanszen-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Haley Truss",
+    "affiliation": "Sophomore",
+    "matriculation_term": "Fall 2023",
+    "college": "Hanszen College",
+    "major": "English",
+    "college_page": "https://search.rice.edu/people/college/hanszen-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Isaac DeAvila",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Hanszen College",
+    "major": "Natural Sciences Division",
+    "college_page": "https://search.rice.edu/people/college/hanszen-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Jane Yoo",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2023",
+    "college": "Hanszen College",
+    "major": "Mechanical Engineering",
+    "college_page": "https://search.rice.edu/people/college/hanszen-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Alexis Frey",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2020",
+    "college": "Jones College",
+    "major": "Biosciences",
+    "college_page": "https://search.rice.edu/people/college/jones-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Korinna Ruiz",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2020",
+    "college": "Jones College",
+    "major": "Biosciences",
+    "college_page": "https://search.rice.edu/people/college/jones-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Steven Dillman",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2020",
+    "college": "Jones College",
+    "major": "Visual and Dramatic Arts Philosophy",
+    "college_page": "https://search.rice.edu/people/college/jones-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Kana Oki",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2026",
+    "college": "Lovett College",
+    "major": "Biosciences",
+    "college_page": "https://search.rice.edu/people/college/lovett-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Vincent Wang",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2023",
+    "college": "Lovett College",
+    "major": "Mathematics",
+    "college_page": "https://search.rice.edu/people/college/lovett-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Audrey Wang",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Martel College",
+    "major": "Engineering Division",
+    "college_page": "https://search.rice.edu/people/college/martel-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Cara Carr",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Martel College",
+    "major": "Statistics",
+    "college_page": "https://search.rice.edu/people/college/martel-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Ishanel Martinez",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Martel College",
+    "major": "Electrical & Computer Eng.",
+    "college_page": "https://search.rice.edu/people/college/martel-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Justin Long",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2020",
+    "college": "Martel College",
+    "major": "Business",
+    "college_page": "https://search.rice.edu/people/college/martel-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Kathryn Hu",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2023",
+    "college": "Martel College",
+    "major": "Operations Research",
+    "college_page": "https://search.rice.edu/people/college/martel-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Saba Feleke",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2020",
+    "college": "Martel College",
+    "major": "Mechanical Engineering Visual and Dramatic Arts",
+    "college_page": "https://search.rice.edu/people/college/martel-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Emma Grace Helmert",
+    "affiliation": "Sophomore",
+    "matriculation_term": "Fall 2023",
+    "college": "McMurtry College",
+    "major": "Psychology",
+    "college_page": "https://search.rice.edu/people/college/mcmurtry-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Jay Jung",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "McMurtry College",
+    "major": "Computer Science",
+    "college_page": "https://search.rice.edu/people/college/mcmurtry-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Jun Bae",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "McMurtry College",
+    "major": "Computer Science",
+    "college_page": "https://search.rice.edu/people/college/mcmurtry-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Maggie Terra",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "McMurtry College",
+    "major": "Biosciences",
+    "college_page": "https://search.rice.edu/people/college/mcmurtry-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Marina Klein",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "McMurtry College",
+    "major": "Mathematics Sociology",
+    "college_page": "https://search.rice.edu/people/college/mcmurtry-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Aastha Sapkota",
+    "affiliation": "Senior",
+    "matriculation_term": "Spring 2023",
+    "college": "Sid Richardson College",
+    "major": "Mathematical Economic Analysis",
+    "college_page": "https://search.rice.edu/people/college/sid-richardson-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Catherine Cheng",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Sid Richardson College",
+    "major": "Asian Studies",
+    "college_page": "https://search.rice.edu/people/college/sid-richardson-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Elroyal Morris",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Sid Richardson College",
+    "major": "Sport Management",
+    "college_page": "https://search.rice.edu/people/college/sid-richardson-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "James Clubley",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Sid Richardson College",
+    "major": "Mechanical Engineering",
+    "college_page": "https://search.rice.edu/people/college/sid-richardson-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Jazmin Mendoza",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Sid Richardson College",
+    "major": "Humanities Division",
+    "college_page": "https://search.rice.edu/people/college/sid-richardson-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Matthew Bitz",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Sid Richardson College",
+    "major": "Computer Science",
+    "college_page": "https://search.rice.edu/people/college/sid-richardson-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Navid Ghodsi",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Sid Richardson College",
+    "major": "Computer Science",
+    "college_page": "https://search.rice.edu/people/college/sid-richardson-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Neo Lefeta",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Sid Richardson College",
+    "major": "Biosciences",
+    "college_page": "https://search.rice.edu/people/college/sid-richardson-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Cassandra Chapa",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Wiess College",
+    "major": "Biosciences",
+    "college_page": "https://search.rice.edu/people/college/wiess-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Faith Zhang",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2023",
+    "college": "Wiess College",
+    "major": "Operations Research Computer Science",
+    "college_page": "https://search.rice.edu/people/college/wiess-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  },
+  {
+    "name": "Parker Smith",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Wiess College",
+    "major": "Business",
+    "college_page": "https://search.rice.edu/people/college/wiess-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Tiffany Del Real",
+    "affiliation": "Junior",
+    "matriculation_term": "Spring 2023",
+    "college": "Wiess College",
+    "major": "Humanities Division",
+    "college_page": "https://search.rice.edu/people/college/wiess-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Amy Tan",
+    "affiliation": "Senior",
+    "matriculation_term": "Fall 2021",
+    "college": "Will Rice College",
+    "major": "Mathematics Computer Science",
+    "college_page": "https://search.rice.edu/people/college/will-rice-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Marina Ramos",
+    "affiliation": "Sophomore",
+    "matriculation_term": "Fall 2020",
+    "college": "Will Rice College",
+    "major": "Biosciences",
+    "college_page": "https://search.rice.edu/people/college/will-rice-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Peyton Farmer",
+    "affiliation": "Senior",
+    "matriculation_term": "Spring 2023",
+    "college": "Will Rice College",
+    "major": "Civil Engineering",
+    "college_page": "https://search.rice.edu/people/college/will-rice-college/",
+    "review_priority": "medium",
+    "possible_reason": "matriculation year may indicate a gap year, extended program, or graduate student"
+  },
+  {
+    "name": "Vismay Ravikumar",
+    "affiliation": "Freshman",
+    "matriculation_term": "Fall 2024",
+    "college": "Will Rice College",
+    "major": "Computer Science",
+    "college_page": "https://search.rice.edu/people/college/will-rice-college/",
+    "review_priority": "medium",
+    "possible_reason": "calculated grade differs from listed affiliation"
+  }
+]
