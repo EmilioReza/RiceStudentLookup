@@ -28,6 +28,36 @@ from pathlib import Path
 DATA_DIR = Path(__file__).resolve().parent.parent / "rice_scraper" / "data"
 OUT_DIR = Path(__file__).resolve().parent
 CSV_PATH = DATA_DIR / "rice_people.csv"
+FLAGGED_PATH = DATA_DIR / "flagged_people.json"
+
+# Matches the scraper's own constant (rice_scraper/scrape_rice_people.py) so
+# a grade recomputed here from matriculation_term lines up with the
+# "calculated_grade" column the scraper already wrote into the CSV.
+CURRENT_ACADEMIC_YEAR = 2026
+EXTENDED_GRADE_NAMES = {
+    1: "Freshman", 2: "Sophomore", 3: "Junior", 4: "Senior",
+    5: "Super Senior", 6: "Super Duper Senior",
+}
+
+
+def parse_matriculation_year(term):
+    match = re.fullmatch(r"(Fall|Spring) (\d{4})", (term or "").strip())
+    if not match:
+        return None
+    year = int(match.group(2))
+    return year - (1 if match.group(1) == "Spring" else 0)
+
+
+def matriculation_grade_label(matriculation_year):
+    """Class standing implied by matriculation year alone, extended past
+    Senior (unlike the scraper's own calculated_grade, which the scraper
+    caps/overrides to fit the standard 4 grades)."""
+    if matriculation_year is None:
+        return None
+    years_since = CURRENT_ACADEMIC_YEAR - matriculation_year + 1
+    if years_since < 1:
+        return None
+    return EXTENDED_GRADE_NAMES.get(years_since, "Unc")
 
 DIVISION_MARKERS = {
     "Architecture Division": "Architecture",
@@ -246,71 +276,132 @@ def build_atomic_dict():
     return set(MAJOR_INFO.keys()) | set(DIVISION_MARKERS.keys())
 
 
-def main():
-    with open(CSV_PATH, newline="", encoding="utf-8") as f:
-        rows = list(csv.DictReader(f))
+def classify_major(raw_major, atomic_dict, unmapped_leaf_majors):
+    """Split a raw major field into display majors + divisions.
+    Returns (majors_out, division_set, no_major_declared, needs_review)."""
+    majors_out = []
+    division_set = set()
+    no_major_declared = False
+    needs_review = False
 
-    atomic_dict = build_atomic_dict()
+    if not raw_major:
+        no_major_declared = True
+    elif raw_major in DIVISION_MARKERS:
+        no_major_declared = True
+        division_set.add(DIVISION_MARKERS[raw_major])
+    else:
+        pieces = segment(raw_major, atomic_dict)
+        for piece in pieces:
+            if piece in DIVISION_MARKERS:
+                division_set.add(DIVISION_MARKERS[piece])
+                continue
+            info = MAJOR_INFO.get(piece)
+            if info is None:
+                unmapped_leaf_majors.add(piece)
+                majors_out.append(piece)
+                needs_review = True
+                continue
+            display, division = info
+            if display is None:
+                majors_out.append(piece)
+                needs_review = True
+            else:
+                majors_out.append(display)
+                if division:
+                    division_set.add(division)
 
-    students = []
-    review_rows = []
-    unmapped_leaf_majors = set()
+    return majors_out, division_set, no_major_declared, needs_review
 
-    for row in rows:
-        name = row["name"].strip()
-        college = row["college"].strip()
-        grade = row["calculated_grade"].strip()
-        raw_major = row["major"].strip()
 
-        majors_out = []
-        division_set = set()
-        no_major_declared = False
-        needs_review = False
+def build_student(name, college, raw_major, grade, grade_by_credits,
+                   matriculation_term, is_flagged, flag_reason,
+                   atomic_dict, unmapped_leaf_majors, review_rows):
+    majors_out, division_set, no_major_declared, needs_review = classify_major(
+        raw_major, atomic_dict, unmapped_leaf_majors
+    )
 
-        if not raw_major:
-            no_major_declared = True
-        elif raw_major in DIVISION_MARKERS:
-            no_major_declared = True
-            division_set.add(DIVISION_MARKERS[raw_major])
-        else:
-            pieces = segment(raw_major, atomic_dict)
-            for piece in pieces:
-                if piece in DIVISION_MARKERS:
-                    division_set.add(DIVISION_MARKERS[piece])
-                    continue
-                info = MAJOR_INFO.get(piece)
-                if info is None:
-                    unmapped_leaf_majors.add(piece)
-                    majors_out.append(piece)
-                    needs_review = True
-                    continue
-                display, division = info
-                if display is None:
-                    majors_out.append(piece)
-                    needs_review = True
-                else:
-                    majors_out.append(display)
-                    if division:
-                        division_set.add(division)
-
-        if needs_review:
-            review_rows.append({
-                "name": name,
-                "college": college,
-                "grade": grade,
-                "raw_major": raw_major,
-            })
-
-        students.append({
+    if needs_review:
+        review_rows.append({
+            "source": "flagged" if is_flagged else "main",
             "name": name,
             "college": college,
             "grade": grade,
-            "gradeRank": GRADE_ORDER.get(grade, -1),
-            "majors": majors_out,
-            "divisions": sorted(division_set),
-            "noMajorDeclared": no_major_declared,
-            "needsReview": needs_review,
+            "raw_major": raw_major,
         })
+
+    matriculation_year = parse_matriculation_year(matriculation_term)
+    grade_by_matriculation = matriculation_grade_label(matriculation_year)
+    grade_mismatch = bool(
+        grade_by_credits and grade_by_matriculation
+        and grade_by_credits.strip().lower() != grade_by_matriculation.strip().lower()
+    )
+
+    return {
+        "name": name,
+        "college": college,
+        "grade": grade,
+        "gradeRank": GRADE_ORDER.get(grade, -1),
+        "gradeByCredits": grade_by_credits or None,
+        "matriculationYear": matriculation_year,
+        "gradeByMatriculation": grade_by_matriculation,
+        "gradeMismatch": grade_mismatch,
+        "majors": majors_out,
+        "divisions": sorted(division_set),
+        "noMajorDeclared": no_major_declared,
+        "needsReview": needs_review,
+        "isFlagged": is_flagged,
+        "flagReason": flag_reason,
+    }
+
+
+def main():
+    with open(CSV_PATH, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    with open(FLAGGED_PATH, encoding="utf-8") as f:
+        flagged_rows = json.load(f)
+
+    atomic_dict = build_atomic_dict()
+    unmapped_leaf_majors = set()
+    review_rows = []
+    students = []
+
+    for row in rows:
+        students.append(build_student(
+            name=row["name"].strip(),
+            college=row["college"].strip(),
+            raw_major=row["major"].strip(),
+            grade=row["calculated_grade"].strip(),
+            grade_by_credits=row["affiliation"].strip(),
+            matriculation_term=row["matriculation_term"],
+            is_flagged=False,
+            flag_reason=None,
+            atomic_dict=atomic_dict,
+            unmapped_leaf_majors=unmapped_leaf_majors,
+            review_rows=review_rows,
+        ))
+
+    # People the scraper excluded from the clean dataset because their
+    # listed class standing ("affiliation", i.e. grade by credits) and
+    # their matriculation year disagreed too much to auto-resolve. Included
+    # here too, but only shown in the UI behind an explicit toggle.
+    for row in flagged_rows:
+        grade_by_credits = (row.get("affiliation") or "").strip()
+        matriculation_year = parse_matriculation_year(row.get("matriculation_term"))
+        grade_by_matriculation = matriculation_grade_label(matriculation_year)
+        best_guess_grade = grade_by_matriculation or grade_by_credits or "Unknown"
+        students.append(build_student(
+            name=row["name"].strip(),
+            college=row["college"].strip(),
+            raw_major=(row.get("major") or "").strip(),
+            grade=best_guess_grade,
+            grade_by_credits=grade_by_credits,
+            matriculation_term=row.get("matriculation_term"),
+            is_flagged=True,
+            flag_reason=row.get("possible_reason"),
+            atomic_dict=atomic_dict,
+            unmapped_leaf_majors=unmapped_leaf_majors,
+            review_rows=review_rows,
+        ))
 
     OUT_DIR.mkdir(exist_ok=True)
     with open(OUT_DIR / "data.js", "w", encoding="utf-8") as f:
@@ -320,12 +411,13 @@ def main():
 
     if review_rows:
         with open(OUT_DIR / "needs_review.csv", "w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=["name", "college", "grade", "raw_major"])
+            w = csv.DictWriter(f, fieldnames=["source", "name", "college", "grade", "raw_major"])
             w.writeheader()
             w.writerows(review_rows)
 
-    print(f"Total people: {len(students)}")
-    print(f"Flagged for manual review: {len(review_rows)}")
+    flagged_count = sum(1 for s in students if s["isFlagged"])
+    print(f"Total people: {len(students)} ({flagged_count} flagged, hidden by default)")
+    print(f"Flagged for manual major review: {len(review_rows)}")
     if unmapped_leaf_majors:
         print("Unmapped leaf majors (add to MAJOR_INFO):")
         for m in sorted(unmapped_leaf_majors):

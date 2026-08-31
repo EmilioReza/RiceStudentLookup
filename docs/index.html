@@ -170,6 +170,26 @@
   .div-tag { color: var(--gray-600); font-size: 0.78rem; }
   .no-major { color: var(--gray-400); font-style: italic; font-size: 0.85rem; }
 
+  .grade-detail summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  .grade-detail summary::-webkit-details-marker { display: none; }
+  .grade-asterisk { color: var(--blue-light); font-weight: 700; margin-left: 1px; }
+  .grade-detail[open] summary .grade-asterisk { color: var(--gray-600); }
+  .grade-detail-body {
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: var(--gray-50);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    line-height: 1.5;
+    max-width: 240px;
+  }
+  .flag-note { color: #9a6b00; }
+
   .suggestions {
     background: #fff8e6;
     border: 1px solid #f0dca0;
@@ -252,6 +272,7 @@
     <div class="result-count" id="resultCount"></div>
     <div style="display:flex; gap:8px;">
       <button class="undecl-toggle" id="undeclToggle" title="Include/exclude students who haven't declared a specific major yet">Hide undeclared</button>
+      <button class="undecl-toggle" id="flaggedToggle" title="Include people the scraper excluded because their listed class standing and matriculation year didn't clearly agree">Show flagged</button>
       <button class="clear-btn" id="clearBtn">Clear all filters</button>
     </div>
   </div>
@@ -279,7 +300,11 @@ const state = {
   majorFilterText: "",
   majorSortMode: "alpha", // "alpha" | "popularity"
   initialsMode: false,
+  showFlagged: false,
 };
+
+const FLAGGED_COUNT = STUDENTS.filter(s => s.isFlagged).length;
+document.getElementById("flaggedToggle").textContent = `Show flagged (${FLAGGED_COUNT})`;
 
 // ---------- derive static facet value lists (all possible values, unfiltered) ----------
 const collegeSet = new Set(), majorSet = new Set();
@@ -377,6 +402,7 @@ function getQueryMatchedStudents() {
 // applies since it isn't one of the four chip categories.
 function passesExcept(s, exclude, queryMatchedSet) {
   if (!queryMatchedSet.has(s)) return false;
+  if (!state.showFlagged && s.isFlagged) return false;
   if (exclude !== "colleges" && state.colleges.size && !state.colleges.has(s.college)) return false;
   if (exclude !== "grades" && state.grades.size && !state.grades.has(s.grade)) return false;
   if (exclude !== "divisions" && state.divisions.size && !s.divisions.some(d => state.divisions.has(d))) return false;
@@ -399,15 +425,8 @@ function computeFacetCounts(exclude, valueExtractor, queryMatchedSet) {
 }
 
 function getFiltered() {
-  let list = getQueryMatchedStudents();
-
-  if (state.colleges.size) list = list.filter(s => state.colleges.has(s.college));
-  if (state.grades.size) list = list.filter(s => state.grades.has(s.grade));
-  if (state.divisions.size) list = list.filter(s => s.divisions.some(d => state.divisions.has(d)));
-  if (state.majors.size) list = list.filter(s => s.majors.some(m => state.majors.has(m)));
-  if (state.hideUndeclared) list = list.filter(s => !s.noMajorDeclared);
-
-  return list;
+  const queryMatchedSet = new Set(getQueryMatchedStudents());
+  return STUDENTS.filter(s => passesExcept(s, null, queryMatchedSet));
 }
 
 // ---------- rendering ----------
@@ -461,6 +480,32 @@ function renderSuggestions(filtered) {
   });
 }
 
+// Grade shown two ways can disagree: "grade by credits" (affiliation, what
+// Rice's own directory lists) vs. "grade by matriculation year" (computed
+// from when they started). When they agree, show the one grade plain. When
+// they don't -- or the person is only visible via the flagged toggle --
+// mark it with a clickable asterisk that expands both numbers.
+function gradeCell(s) {
+  const primary = escapeHtml(s.grade);
+  if (!s.gradeMismatch && !s.isFlagged) return primary;
+
+  const lines = [];
+  if (s.matriculationYear && s.gradeByMatriculation) {
+    lines.push(`Matriculation year: ${s.matriculationYear} (${escapeHtml(s.gradeByMatriculation)})`);
+  }
+  if (s.gradeByCredits) {
+    lines.push(`Grade by credits: ${escapeHtml(s.gradeByCredits)}`);
+  }
+  if (s.isFlagged && s.flagReason) {
+    lines.push(`<span class="flag-note">⚠ Flagged: ${escapeHtml(s.flagReason)}</span>`);
+  }
+
+  return `<details class="grade-detail">
+    <summary>${primary}<span class="grade-asterisk">*</span></summary>
+    <div class="grade-detail-body">${lines.join("<br>")}</div>
+  </details>`;
+}
+
 function renderResults(filtered) {
   const wrap = document.getElementById("resultsWrap");
   const countEl = document.getElementById("resultCount");
@@ -489,7 +534,7 @@ function renderResults(filtered) {
     } else {
       majorCell = `<span class="no-major">—</span>`;
     }
-    html += `<tr><td class="name-cell">${escapeHtml(s.name)}</td><td>${escapeHtml(s.college)}</td><td>${escapeHtml(s.grade)}</td><td>${majorCell}</td></tr>`;
+    html += `<tr><td class="name-cell">${escapeHtml(s.name)}</td><td>${escapeHtml(s.college)}</td><td>${gradeCell(s)}</td><td>${majorCell}</td></tr>`;
   }
   html += `</tbody></table>`;
   wrap.innerHTML = html;
@@ -564,6 +609,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   state.majors.clear();
   state.hideUndeclared = false;
   state.initialsMode = false;
+  state.showFlagged = false;
   state.page = 1;
   document.getElementById("searchInput").value = "";
   document.getElementById("searchInput").placeholder = "Search by name…";
@@ -571,12 +617,20 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   state.majorFilterText = "";
   document.getElementById("undeclToggle").classList.remove("active");
   document.getElementById("initialsToggle").classList.remove("active");
+  document.getElementById("flaggedToggle").classList.remove("active");
   render();
 });
 
 document.getElementById("undeclToggle").addEventListener("click", (e) => {
   state.hideUndeclared = !state.hideUndeclared;
   e.target.classList.toggle("active", state.hideUndeclared);
+  state.page = 1;
+  render();
+});
+
+document.getElementById("flaggedToggle").addEventListener("click", (e) => {
+  state.showFlagged = !state.showFlagged;
+  e.target.classList.toggle("active", state.showFlagged);
   state.page = 1;
   render();
 });
