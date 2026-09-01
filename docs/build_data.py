@@ -34,6 +34,7 @@ FLAGGED_PATH = DATA_DIR / "flagged_people.json"
 # a grade recomputed here from matriculation_term lines up with the
 # "calculated_grade" column the scraper already wrote into the CSV.
 CURRENT_ACADEMIC_YEAR = 2026
+MIN_INTEGRATED_MATRICULATION_YEAR = 2022
 EXTENDED_GRADE_NAMES = {
     1: "Freshman", 2: "Sophomore", 3: "Junior", 4: "Senior",
     5: "Super Senior", 6: "Super Duper Senior",
@@ -382,11 +383,19 @@ def main():
 
     # People the scraper excluded from the clean dataset because their
     # listed class standing ("affiliation", i.e. grade by credits) and
-    # their matriculation year disagreed too much to auto-resolve. Included
-    # here too, but only shown in the UI behind an explicit toggle.
+    # their matriculation year disagreed too much to auto-resolve. Anyone
+    # who matriculated Fall 2022 or later is folded straight into the main
+    # set (their grade-mismatch asterisk still shows the flag reason);
+    # earlier matriculants are skipped entirely -- most of those are
+    # "gap year / extended program" cases where even the matriculation year
+    # itself doesn't reliably imply a class standing.
+    skipped_pre_2022 = 0
     for row in flagged_rows:
         grade_by_credits = (row.get("affiliation") or "").strip()
         matriculation_year = parse_matriculation_year(row.get("matriculation_term"))
+        if matriculation_year is None or matriculation_year < MIN_INTEGRATED_MATRICULATION_YEAR:
+            skipped_pre_2022 += 1
+            continue
         grade_by_matriculation = matriculation_grade_label(matriculation_year)
         best_guess_grade = grade_by_matriculation or grade_by_credits or "Unknown"
         students.append(build_student(
@@ -415,8 +424,8 @@ def main():
             w.writeheader()
             w.writerows(review_rows)
 
-    flagged_count = sum(1 for s in students if s["isFlagged"])
-    print(f"Total people: {len(students)} ({flagged_count} flagged, hidden by default)")
+    integrated_count = sum(1 for s in students if s["isFlagged"])
+    print(f"Total people: {len(students)} ({integrated_count} integrated from the flagged list, {skipped_pre_2022} skipped as pre-Fall-2022)")
     print(f"Flagged for manual major review: {len(review_rows)}")
     if unmapped_leaf_majors:
         print("Unmapped leaf majors (add to MAJOR_INFO):")

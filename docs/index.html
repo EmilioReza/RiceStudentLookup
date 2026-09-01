@@ -272,7 +272,6 @@
     <div class="result-count" id="resultCount"></div>
     <div style="display:flex; gap:8px;">
       <button class="undecl-toggle" id="undeclToggle" title="Include/exclude students who haven't declared a specific major yet">Hide undeclared</button>
-      <button class="undecl-toggle" id="flaggedToggle" title="Include people the scraper excluded because their listed class standing and matriculation year didn't clearly agree">Show flagged</button>
       <button class="clear-btn" id="clearBtn">Clear all filters</button>
     </div>
   </div>
@@ -300,11 +299,7 @@ const state = {
   majorFilterText: "",
   majorSortMode: "alpha", // "alpha" | "popularity"
   initialsMode: false,
-  showFlagged: false,
 };
-
-const FLAGGED_COUNT = STUDENTS.filter(s => s.isFlagged).length;
-document.getElementById("flaggedToggle").textContent = `Show flagged (${FLAGGED_COUNT})`;
 
 // ---------- derive static facet value lists (all possible values, unfiltered) ----------
 const collegeSet = new Set(), majorSet = new Set();
@@ -402,7 +397,6 @@ function getQueryMatchedStudents() {
 // applies since it isn't one of the four chip categories.
 function passesExcept(s, exclude, queryMatchedSet) {
   if (!queryMatchedSet.has(s)) return false;
-  if (!state.showFlagged && s.isFlagged) return false;
   if (exclude !== "colleges" && state.colleges.size && !state.colleges.has(s.college)) return false;
   if (exclude !== "grades" && state.grades.size && !state.grades.has(s.grade)) return false;
   if (exclude !== "divisions" && state.divisions.size && !s.divisions.some(d => state.divisions.has(d))) return false;
@@ -609,7 +603,6 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   state.majors.clear();
   state.hideUndeclared = false;
   state.initialsMode = false;
-  state.showFlagged = false;
   state.page = 1;
   document.getElementById("searchInput").value = "";
   document.getElementById("searchInput").placeholder = "Search by name…";
@@ -617,20 +610,12 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   state.majorFilterText = "";
   document.getElementById("undeclToggle").classList.remove("active");
   document.getElementById("initialsToggle").classList.remove("active");
-  document.getElementById("flaggedToggle").classList.remove("active");
   render();
 });
 
 document.getElementById("undeclToggle").addEventListener("click", (e) => {
   state.hideUndeclared = !state.hideUndeclared;
   e.target.classList.toggle("active", state.hideUndeclared);
-  state.page = 1;
-  render();
-});
-
-document.getElementById("flaggedToggle").addEventListener("click", (e) => {
-  state.showFlagged = !state.showFlagged;
-  e.target.classList.toggle("active", state.showFlagged);
   state.page = 1;
   render();
 });
